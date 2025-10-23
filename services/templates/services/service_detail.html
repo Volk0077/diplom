@@ -1,0 +1,12 @@
+{% extends 'base.html' %} {% load static %} {% block title %}{{ service.name }}
+- Салон красоты{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}" />
+{% endblock %} {% block content %}
+<h1>{{ service.name }}</h1>
+<p><strong>Категория:</strong> {{ service.category.name }}</p>
+<p><strong>Цена:</strong> {{ service.price }} руб.</p>
+<p><strong>Длительность:</strong> {{ service.duration_minutes }} мин</p>
+<p>{{ service.description }}</p>
+
+<a href="{% url 'services:list' %}" class="btn">Назад к списку</a>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Мои записи - Салон
+красоты{% endblock %} {% block content %}
+<h1>Мои записи</h1>
+
+{% if bookings %}
+<table style="width: 100%; border-collapse: collapse; margin-top: 2rem">
+  <thead>
+    <tr style="background: #f8f9fa">
+      <th style="padding: 1rem; border: 1px solid #ddd">Дата</th>
+      <th style="padding: 1rem; border: 1px solid #ddd">Время</th>
+      <th style="padding: 1rem; border: 1px solid #ddd">Услуга</th>
+      <th style="padding: 1rem; border: 1px solid #ddd">Мастер</th>
+      <th style="padding: 1rem; border: 1px solid #ddd">Статус</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for booking in bookings %}
+    <tr>
+      <td style="padding: 1rem; border: 1px solid #ddd">
+        {{ booking.appointment_date }}
+      </td>
+      <td style="padding: 1rem; border: 1px solid #ddd">
+        {{ booking.appointment_time }}
+      </td>
+      <td style="padding: 1rem; border: 1px solid #ddd">
+        {{ booking.service.name }}
+      </td>
+      <td style="padding: 1rem; border: 1px solid #ddd">
+        {{ booking.staff.get_full_name }}
+      </td>
+      <td style="padding: 1rem; border: 1px solid #ddd">
+        {{ booking.get_status_display }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>У вас пока нет записей.</p>
+{% endif %}
+
+<a href="{% url 'services:list' %}" class="btn">Записаться</a>
+{% endblock %}

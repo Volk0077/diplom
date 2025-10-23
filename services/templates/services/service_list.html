@@ -1,0 +1,28 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Услуги - Салон
+красоты{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}" />
+{% endblock %} {% block content %}
+<h1>Наши услуги</h1>
+
+{% for category in categories %}
+<div class="category-section">
+  <h2>{{ category.name }}</h2>
+  <div class="services-grid">
+    {% for service in category.services.all %} {% if service.is_active %}
+    <div class="service-card">
+      <h3>{{ service.name }}</h3>
+      <p>{{ service.description|truncatewords:20 }}</p>
+      <p class="service-price">Цена: {{ service.price }} руб.</p>
+      <p class="service-duration">
+        Длительность: {{ service.duration_minutes }} мин
+      </p>
+      <a href="{% url 'services:detail' service.slug %}" class="btn"
+        >Подробнее</a
+      >
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+</div>
+{% empty %}
+<p>Услуги пока не добавлены.</p>
+{% endfor %} {% endblock %}
