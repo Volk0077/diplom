@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "rest_framework",
     'users',
     'services',
-    'schedule'
+    'schedule',
+    'bookings'
 ]
 
 MIDDLEWARE = [
