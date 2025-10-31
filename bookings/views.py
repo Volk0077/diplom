@@ -6,6 +6,9 @@ from .forms import BookingForm
 from django.contrib import messages
 from users.models import User
 from services.models import Service
+from datetime import datetime
+from django.utils import timezone
+
 
 
 @login_required
@@ -14,7 +17,14 @@ def my_bookings(request):
     bookings = Booking.objects.filter(client=request.user).order_by(
         "appointment_date", "appointment_time"
     )
-    context = {"bookings": bookings}
+
+    # Текущая дата и время для проверки прошедших записей
+    from django.utils import timezone
+    context = {
+        "bookings": bookings,
+        "today": timezone.now().date(),
+        "now_time": timezone.now().time()
+    }
     return render(request, "bookings/my_bookings.html", context)
 
 
@@ -32,7 +42,6 @@ def create_booking(request):
 
         if form.is_valid():
             # Конвертируем время в правильный формат перед сохранением
-            from datetime import datetime
             time_str = form.cleaned_data['appointment_time']
             form.instance.appointment_time = datetime.strptime(time_str, "%H:%M").time()
 
@@ -42,6 +51,36 @@ def create_booking(request):
     else:
         form = BookingForm()
     return render(request, 'bookings/create_booking.html', {'form': form})
+
+
+def cancel_booking(request, booking_id):
+    """Отмена записи клиентом"""
+    try:
+        booking = Booking.objects.get(
+            id=booking_id,
+            client=request.user
+        )
+
+        # Нельзя отменить уже отмененную запись
+        if booking.status == 'cancelled':
+            messages.error(request, 'Эта запись уже отменена')
+            return redirect('bookings:my_bookings')
+
+        # Проверяем, что запись не в прошлом
+        if booking.appointment_date < timezone.now().date() or \
+            (booking.appointment_date == timezone.now().date() and \
+            booking.appointment_time <= timezone.now().time()):
+            messages.error(request, 'Нельзя отменить прошедшую запись')
+            return redirect('bookings:my_bookings')
+        
+        booking.status = 'cancelled'
+        booking.save(user=request.user)
+        messages.success(request, f'Запись на {booking.appointment_date} в {booking.appointment_time} отменена')
+
+    except Booking.DoesNotExist:
+        messages.error(request, 'Запись не найдена или уже отменена')
+    
+    return redirect('bookings:my_bookings')
 
 
 def api_services_list(request):

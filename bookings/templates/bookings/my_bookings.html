@@ -12,30 +12,45 @@
             <th style="padding: 1rem">Мастер</th>
             <th style="padding: 1rem">Цена</th>
             <th style="padding: 1rem">Статус</th>
+            <th style="padding: 1rem">Действия</th>
         </tr>
     </thead>
     <tbody>
         {% for booking in bookings %}
-        <tr>
-            <td style="padding: 1rem">
-                {{ booking.appointment_date }}
-            </td>
-            <td style="padding: 1rem">
-                {{ booking.appointment_time }}
-            </td>
-            <td style="padding: 1rem">
-                {{ booking.service.name }}
-            </td>
-            <td style="padding: 1rem">
-                {{ booking.staff.get_full_name }}
-            </td>
-            <td style="padding: 1rem">
-                {{ booking.service.price }} руб.
-            </td>
-            <td style="padding: 1rem">
-                {{ booking.get_status_display }}
-            </td>
-        </tr>
+        <div class="booking-item">
+            <tr>
+                <td style="padding: 1rem">
+                    {{ booking.appointment_date }}
+                </td>
+                <td style="padding: 1rem">
+                    {{ booking.appointment_time }}
+                </td>
+                <td style="padding: 1rem">
+                    {{ booking.service.name }}
+                </td>
+                <td style="padding: 1rem">
+                    {{ booking.staff.get_full_name }}
+                </td>
+                <td style="padding: 1rem">
+                    {{ booking.service.price }} руб.
+                </td>
+                <td style="padding: 1rem">
+                    {{ booking.get_status_display }}
+                </td>
+                <td style="padding: 1rem">
+                    {% if booking.status == 'cancelled' %}
+                        Отменена
+                    {% elif booking.appointment_date < today or booking.appointment_date == today and booking.appointment_time <= now_time %}
+                        Прошла
+                    {% else %}
+                        <form method="post" action="{% url 'bookings:cancel_booking' booking.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Отменить</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        </div>
         {% endfor %}
     </tbody>
 </table>
