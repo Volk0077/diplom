@@ -1,10 +1,136 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+{% block title %}Создать запись - Салон красоты{% endblock %}
 
 {% block content %}
-<h1>Создать бронирование</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Забронировать</button>
-</form>
+<div class="booking-card">
+    <div class="card-header">
+        <h2>Запишитесь на услугу</h2>
+        <p>Выберите удобное время для посещения</p>
+    </div>  
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="errors">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-section">
+            <h3>Выберите категорию услуги</h3>
+            <div class="form-group">
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="errors">{{ form.category.errors }}</div>
+                {% endif %}
+            </div>
+        </div>      
+
+        <div class="form-section">
+            <h3>Выберите услугу</h3>
+            <div class="form-group">
+                {{ form.service }}
+                {% if form.service.errors %}
+                    <div class="errors">{{ form.service.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Выберите мастера</h3>
+            <div class="form-group">
+                {{ form.staff }}
+                {% if form.staff.errors %}
+                    <div class="errors">{{ form.staff.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>📅 Дата и время</h3>
+            <div class="form-group">
+                {{ form.appointment_date }}
+                {% if form.appointment_date.errors %}
+                    <div class="errors">{{ form.appointment_date.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.appointment_time }}
+                {% if form.appointment_time.errors %}
+                    <div class="errors">{{ form.appointment_time.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-modern">Создать запись</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.querySelector('select[name="category"]');
+    const serviceSelect = document.querySelector('select[name="service"]');
+    const staffSelect = document.querySelector('select[name="staff"]');
+
+    if (categorySelect && serviceSelect && staffSelect) {
+        // Функция для обновления списка услуг
+        function updateServices() {
+            const categoryId = categorySelect.value;
+            serviceSelect.innerHTML = '<option value="">Выберите услугу</option>';
+            staffSelect.innerHTML = '<option value="">Сначала выберите услугу</option>';
+
+            if (!categoryId) {
+                return;
+            }
+
+            // Загружаем услуги для выбранной категории
+            fetch(`/bookings/api/services/?category=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.id;
+                        option.textContent = service.name;
+                        serviceSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading services:', error));
+        }
+
+        // Функция для обновления списка мастеров
+        function updateStaff() {
+            const serviceId = serviceSelect.value;
+            staffSelect.innerHTML = '<option value="">Выберите мастера</option>';
+
+            if (!serviceId) {
+                return;
+            }
+
+            // Загружаем мастеров для выбранной услуги
+            fetch(`/bookings/api/staff/?service=${serviceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(staff => {
+                        const option = document.createElement('option');
+                        option.value = staff.id;
+                        option.textContent = staff.first_name;
+                        staffSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading staff:', error));
+        }
+
+        // Слушаем изменения
+        categorySelect.addEventListener('change', updateServices);
+        serviceSelect.addEventListener('change', updateStaff);
+    }
+});
+</script>
 {% endblock %}

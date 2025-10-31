@@ -14,25 +14,26 @@ class Booking(models.Model):
         NO_SHOW = "no_show", "Клиент не пришёл"
 
     # Основные поля
-    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings", verbose_name="Клиент")
     staff = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="staff_bookings"
+        User, on_delete=models.CASCADE, related_name="staff_bookings", verbose_name="Мастер"
     )
-    service = models.ForeignKey(Service, on_delete=models.PROTECT)
+    service = models.ForeignKey(Service, on_delete=models.PROTECT, verbose_name="Услуга")
 
     # Время записи
-    appointment_date = models.DateField()
-    appointment_time = models.TimeField()
+    appointment_date = models.DateField(verbose_name="Дата записи")
+    appointment_time = models.TimeField(verbose_name="Время записи")
 
     # Статус и метаданные
     status = models.CharField(
-        max_length=16, choices=Status.choices, default=Status.PENDING
+        max_length=16, choices=Status.choices, default=Status.PENDING,
+        verbose_name="Статус"
     )
-    notes = models.TextField(blank=True, help_text="Дополнительные заметки")
+    notes = models.TextField(blank=True, verbose_name="Заметки", help_text="Дополнительные заметки")
 
     # Временные метки
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     class Meta:
         verbose_name = "Бронирование"
@@ -42,30 +43,44 @@ class Booking(models.Model):
         unique_together = ("staff", "appointment_date", "appointment_time")
 
     def __str__(self) -> str:
-        return f"{self.client.get_full_name()} → {self.service.name} ({self.appointment_date} {self.appointment_time})"
+        client_name = self.client.get_full_name() if self.client else "Без клиента"
+        service_name = self.service.name if self.service else "Без услуги"
+        return f"{client_name} → {service_name} ({self.appointment_date} {self.appointment_time})"
 
     def clean(self):
         """Валидация бронирования"""
         super().clean()
 
-        # Проверяем, что клиент имеет роль "client"
-        if self.client.role != User.Roles.CLIENT:
+        # Проверяем роли только если объекты установлены
+        if self.client and self.client.role != User.Roles.CLIENT:
             raise ValidationError("Бронирование может создать только клиент")
 
-        # Проверяем, что мастер имеет роль "staff"
-        if self.staff.role != User.Roles.STAFF:
+        if self.staff and self.staff.role != User.Roles.STAFF:
             raise ValidationError("Мастер должен иметь роль 'staff'")
 
-        # Проверяем, что дата не в прошлом
-        if self.appointment_date < timezone.now().date():
-            raise ValidationError("Нельзя записаться на прошедшую дату")
-
-        # Проверяем, что услуга активна
-        if not self.service.is_active:
+        # Проверяем услугу только если она установлена
+        if self.service and not self.service.is_active:
             raise ValidationError("Услуга неактивна")
 
+        # Валидация даты перенесена в форму для лучшего UX
+
     def save(self, *args, **kwargs):
-        """Переопределяем save для автоматической валидации"""
+        """Переопределяем save для автоматической валидации и истории изменений"""
+        # Извлекаем пользователя из kwargs, если передан
+        user = kwargs.pop('user', None)
+
+        # Проверяем, изменился ли статус
+        if self.pk:  # Если объект уже существует
+            old_booking = Booking.objects.get(pk=self.pk)
+            if old_booking.status != self.status:
+                # Создаем запись в истории
+                from .models import BookingHistory
+                BookingHistory.objects.create(
+                    booking=self,
+                    action=self.status,
+                    user=user
+                )
+
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -84,20 +99,19 @@ class BookingHistory(models.Model):
     """История изменений бронирования"""
 
     class Action(models.TextChoices):
-        CREATED = "created", "Создано"
+        PENDING = "pending", "Ожидает подтверждения"
         CONFIRMED = "confirmed", "Подтверждено"
-        CANCELLED = "cancelled", "Отменено"
-        RESCHEDULED = "rescheduled", "Перенесено"
         COMPLETED = "completed", "Завершено"
-        NO_SHOW = "no_show", "Не пришёл"
+        CANCELLED = "cancelled", "Отменено"
+        NO_SHOW = "no_show", "Клиент не пришел"
 
     booking = models.ForeignKey(
-        Booking, on_delete=models.CASCADE, related_name="history"
+        Booking, on_delete=models.CASCADE, related_name="history", verbose_name="Бронирование"
     )
-    action = models.CharField(max_length=16, choices=Action.choices)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    action = models.CharField(max_length=16, choices=Action.choices, verbose_name="Действие")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Пользователь")
+    notes = models.TextField(blank=True, verbose_name="Заметки")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     class Meta:
         verbose_name = "История бронирования"

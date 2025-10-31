@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from bookings.models import Booking
 from .forms import UserRegistrationForm
 
@@ -21,3 +21,9 @@ def register(request):
     else:
         form = UserRegistrationForm()
     return render(request,'users/register.html', {'form':form})
+
+
+def logout_redirect(request):
+    logout(request)
+    messages.info(request, 'Вы успешно вышли из системы')
+    return redirect('services:list')

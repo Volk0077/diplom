@@ -1,12 +1,76 @@
-{% extends 'base.html' %} {% load static %} {% block title %}{{ service.name }}
-- Салон красоты{% endblock %} {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/services.css' %}" />
-{% endblock %} {% block content %}
-<h1>{{ service.name }}</h1>
-<p><strong>Категория:</strong> {{ service.category.name }}</p>
-<p><strong>Цена:</strong> {{ service.price }} руб.</p>
-<p><strong>Длительность:</strong> {{ service.duration_minutes }} мин</p>
-<p>{{ service.description }}</p>
+{% extends 'base.html' %}
+{% load static %}
 
-<a href="{% url 'services:list' %}" class="btn">Назад к списку</a>
+{% block title %}{{ service.name }} - Салон красоты{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+<link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="service-detail">
+    <div class="service-info">
+        <h1>{{ service.name }}</h1>
+        <div class="service-meta">
+            <p><strong>Категория:</strong> {{ service.category.name }}</p>
+            <p><strong>Цена:</strong> {{ service.price }} руб.</p>
+            <p><strong>Длительность:</strong> {{ service.duration_minutes }} мин</p>
+        </div>
+        <p class="service-description">{{ service.description }}</p>
+    </div>
+
+    {% if user.is_authenticated and user.role == 'client' %}
+    <div class="booking-section">
+        <h2>Записаться на эту услугу</h2>
+
+        {% if booking_form.non_field_errors %}
+            <div class="errors">
+                {{ booking_form.non_field_errors }}
+            </div>
+        {% endif %} 
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3>👨‍💼 Выберите мастера</h3>
+                <div class="form-group">
+                    {{ booking_form.staff }}
+                    {% if booking_form.staff.errors %}
+                        <div class="errors">{{ booking_form.staff.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>📅 Дата и время</h3>
+                <div class="form-group">
+                    {{ booking_form.appointment_date }}
+                    {% if booking_form.appointment_date.errors %}
+                        <div class="errors">{{ booking_form.appointment_date.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ booking_form.appointment_time }}
+                    {% if booking_form.appointment_time.errors %}
+                        <div class="errors">{{ booking_form.appointment_time.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-modern">Записаться</button>
+        </form>
+    </div>
+    {% elif not user.is_authenticated %}
+        <div class="auth-required">
+            <p>Чтобы записаться на услугу, <a href="{% url 'users:login' %}">войдите</a> или <a href="{% url 'users:register' %}">зарегистрируйтесь</a>.</p>
+        </div>
+    {% endif %}
+
+    <div class="service-actions">
+        <a href="{% url 'services:list' %}" class="btn btn-secondary">Назад к списку услуг</a>
+    </div>
+</div>
 {% endblock %}

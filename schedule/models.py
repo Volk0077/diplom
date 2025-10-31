@@ -5,13 +5,15 @@ from users.models import User
 
 class WorkingHours(models.Model):
     """Рабочие часы мастера по дням недели"""
-    staff = models.ForeignKey(User, on_delete=models.CASCADE, related_name="working_hours")
-    day_of_week = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(6)],
+    staff = models.ForeignKey(User, on_delete=models.CASCADE, related_name="working_hours", verbose_name="Мастер")
+    day_of_week = models.PositiveIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(6)],
+        verbose_name="День недели",
         help_text="0=Понедельник, 1=Вторник, ..., 6=Воскресенье"
     )
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    is_active = models.BooleanField(default=True)
+    start_time = models.TimeField(verbose_name="Время начала")
+    end_time = models.TimeField(verbose_name="Время окончания")
+    is_active = models.BooleanField(default=True, verbose_name="Активно")
 
     class Meta:
         verbose_name = "Рабочие часы"
@@ -26,11 +28,11 @@ class WorkingHours(models.Model):
 
 class SpecialHours(models.Model):
     """Особые часы работы (праздники, переносы)"""
-    staff = models.ForeignKey(User, on_delete=models.CASCADE, related_name="special_hours")
-    date = models.DateField()
-    start_time = models.TimeField(null=True, blank=True) # None - выходной
-    end_time = models.TimeField(null=True, blank=True)
-    note = models.CharField(max_length=255, blank=True)
+    staff = models.ForeignKey(User, on_delete=models.CASCADE, related_name="special_hours", verbose_name="Мастер")
+    date = models.DateField(verbose_name="Дата")
+    start_time = models.TimeField(null=True, blank=True, verbose_name="Время начала") # None - выходной
+    end_time = models.TimeField(null=True, blank=True, verbose_name="Время окончания")
+    note = models.CharField(max_length=255, blank=True, verbose_name="Примечание")
 
     class Meta:
         verbose_name = "Особые часы работы"

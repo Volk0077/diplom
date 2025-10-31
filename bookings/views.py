@@ -1,27 +1,84 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .models import Booking
 from .forms import BookingForm
+from django.contrib import messages
+from users.models import User
+from services.models import Service
 
 
 @login_required
 def my_bookings(request):
     """Записи клиента"""
     bookings = Booking.objects.filter(client=request.user).order_by(
-        "-appointment_date", "-appointment_time"
+        "appointment_date", "appointment_time"
     )
     context = {"bookings": bookings}
     return render(request, "bookings/my_bookings.html", context)
 
 
+@login_required
 def create_booking(request):
+    # Проверяем, что пользователь имеет роль клиента
+    if request.user.role != 'client':
+        messages.error(request, 'Только клиенты могут создавать записи')
+        return redirect('services:list')
+
     if request.method == "POST":
         form = BookingForm(request.POST)
+        # Устанавливаем client до валидации
+        form.instance.client = request.user
+
         if form.is_valid():
+            # Конвертируем время в правильный формат перед сохранением
+            from datetime import datetime
+            time_str = form.cleaned_data['appointment_time']
+            form.instance.appointment_time = datetime.strptime(time_str, "%H:%M").time()
+
             form.save()
-            return redirect('success')
+            messages.success(request, 'Запись успешно создана!')
+            return redirect('bookings:my_bookings')
     else:
         form = BookingForm()
-    return render(request, 'bookings/create_booking.html', {'form':form})
+    return render(request, 'bookings/create_booking.html', {'form': form})
 
 
+def api_services_list(request):
+    """API для получения списка услуг по категории"""
+    category_id = request.GET.get('category')
+    
+    if category_id:
+        try:
+            from services.models import ServiceCategory
+            category = ServiceCategory.objects.get(pk=category_id)
+            # Возвращаем услуги этой категории
+            services = Service.objects.filter(category=category).values('id', 'name').order_by('name')
+        except ServiceCategory.DoesNotExist:
+            services = Service.objects.none()
+    else:
+        # Если категория не указана, возвращаем все услуги
+        services = Service.objects.filter(is_active=True).values('id', 'name').order_by('name')
+    
+    return JsonResponse(list(services), safe=False)
+
+
+def api_staff_list(request):
+    """API для получения списка мастеров"""
+    service_id = request.GET.get('service')
+
+    if service_id:
+        try:
+            service = Service.objects.get(pk=service_id)
+            # Возвращаем мастеров, специализирующихся на категории услуги
+            staff = User.objects.filter(
+                role='staff',
+                specialization=service.category
+            ).values('id', 'first_name').order_by('first_name')
+        except Service.DoesNotExist:
+            staff = User.objects.filter(role='staff').values('id', 'first_name').order_by('first_name')
+    else:
+        # Если услуга не указана, возвращаем всех мастеров
+        staff = User.objects.filter(role='staff').values('id', 'first_name').order_by('first_name')
+
+    return JsonResponse(list(staff), safe=False)

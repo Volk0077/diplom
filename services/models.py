@@ -10,9 +10,9 @@ def transliterate_slug(text):
 
 
 class ServiceCategory(models.Model):
-    name = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128, unique=True, verbose_name="Название")
     slug = models.SlugField(max_length=128, unique=True, null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
 
     class Meta:
         verbose_name = "Категория услуги"
@@ -32,18 +32,18 @@ class Service(models.Model):
     category = models.ForeignKey(
         ServiceCategory, on_delete=models.PROTECT, related_name="services"
     )
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, verbose_name="Название")
     slug = models.SlugField(max_length=128, unique=True, null=True, blank=True)
-    description = models.TextField(blank=True)
-    duration_minutes = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True, verbose_name="Описание")
+    duration_minutes = models.PositiveIntegerField(verbose_name="Длительность (минуты)")
+    price = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Цена")
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
 
     class Meta:
         verbose_name = "Услуга"
         verbose_name_plural = "Услуги"
         unique_together = ("category", "name")
-        ordering = ["category__name", "name"]
+        ordering = ["name"]  # Изменено на алфавитный порядок по названию
 
     def __str__(self) -> str:
         return f"{self.name} ({self.duration_minutes} мин)"
