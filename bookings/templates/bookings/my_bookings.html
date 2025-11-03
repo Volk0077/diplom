@@ -5,7 +5,16 @@
 {% if bookings %}
 <table style="width: 100%; border-collapse: collapse; margin-top: 2rem">
     <thead>
-        <tr style="background: linear-gradient(135deg, #e8f4fd 0%, #a8d5f0 80%,  #a8d5f0 80%)">
+        <tr
+            style="
+                background: linear-gradient(
+                    135deg,
+                    #e8f4fd 0%,
+                    #a8d5f0 80%,
+                    #a8d5f0 80%
+                );
+            "
+        >
             <th style="padding: 1rem">Дата</th>
             <th style="padding: 1rem">Время</th>
             <th style="padding: 1rem">Услуга</th>
@@ -19,34 +28,39 @@
         {% for booking in bookings %}
         <div class="booking-item">
             <tr>
+                <td style="padding: 1rem">{{ booking.appointment_date }}</td>
+                <td style="padding: 1rem">{{ booking.appointment_time }}</td>
+                <td style="padding: 1rem">{{ booking.service.name }}</td>
+                <td style="padding: 1rem">{{ booking.staff.get_full_name }}</td>
+                <td style="padding: 1rem">{{ booking.service.price }} руб.</td>
+                <td style="padding: 1rem">{{ booking.get_status_display }}</td>
                 <td style="padding: 1rem">
-                    {{ booking.appointment_date }}
-                </td>
-                <td style="padding: 1rem">
-                    {{ booking.appointment_time }}
-                </td>
-                <td style="padding: 1rem">
-                    {{ booking.service.name }}
-                </td>
-                <td style="padding: 1rem">
-                    {{ booking.staff.get_full_name }}
-                </td>
-                <td style="padding: 1rem">
-                    {{ booking.service.price }} руб.
-                </td>
-                <td style="padding: 1rem">
-                    {{ booking.get_status_display }}
-                </td>
-                <td style="padding: 1rem">
-                    {% if booking.status == 'cancelled' %}
-                        Отменена
-                    {% elif booking.appointment_date < today or booking.appointment_date == today and booking.appointment_time <= now_time %}
-                        Прошла
+                    {% if booking.status == 'cancelled' %} Отменена {% elif
+                    booking.appointment_date < today or booking.appointment_date
+                    == today and booking.appointment_time <= now_time %} Прошла
+                    {% elif booking.status == 'completed' %} {% if
+                    booking.review %}
+                    <span style="color: #2e8b57; font-weight: bold"
+                        >✓ Отзыв оставлен</span
+                    >
                     {% else %}
-                        <form method="post" action="{% url 'bookings:cancel_booking' booking.id %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Отменить</button>
-                        </form>
+                    <a
+                        href="{% url 'bookings:add_review' booking.id %}"
+                        class="btn"
+                        style="padding: 6px 12px; font-size: 12px"
+                        >Оставить отзыв</a
+                    >
+                    {% endif %} {% else %}
+                    <form
+                        method="post"
+                        action="{% url 'bookings:cancel_booking' booking.id %}"
+                        style="display: inline"
+                    >
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            Отменить
+                        </button>
+                    </form>
                     {% endif %}
                 </td>
             </tr>

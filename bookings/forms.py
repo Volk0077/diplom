@@ -1,5 +1,5 @@
 from django import forms
-from .models import Booking
+from .models import Booking, Review
 from schedule.models import WorkingHours, SpecialHours
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -349,3 +349,24 @@ class ServiceBookingForm(forms.ModelForm):
         )
 
         return not conflicts
+    
+
+class ReviewForm(forms.ModelForm):
+    """Форма для отзывов о мастерах"""
+
+    rating = forms.IntegerField(
+        min_value=1,
+        max_value=5,
+        widget=forms.HiddenInput,  # Скрытое поле, значение будет устанавливаться JavaScript
+        label="Оценка мастера"
+    )
+
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 5, 'placeholder': 'Расскажите о вашем опыте...'}),
+        required=False,
+        label="Комментарий"
+    )
+
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']

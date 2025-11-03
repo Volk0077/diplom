@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оставить отзыв - Салон красоты{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="booking-card page-add-review">
+    <div class="card-header">
+        <h2>Оставить отзыв</h2>
+        <p>Расскажите о вашем опыте работы с мастером</p>
+    </div>
+
+    <div class="service-info"style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+        <h3>{{ booking.service.name }}</h3>
+        <p><strong>Мастер:</strong> {{ booking.staff.get_full_name }}</p>
+        <p><strong>Дата:</strong> {{ booking.appointment_date }} в {{ booking.appointment_time }}</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h3>Ваша оценка</h3>
+            <div class="form-group">
+                <div class="rating-stars" id="rating-stars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                {{ form.rating }}
+                {% if form.rating.errors %}
+                    <div class="errors">{{ form.rating.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Комментарий (необязательно)</h3>
+            <div class="form-group">
+                {{ form.comment }}
+                {% if form.comment.errors %}
+                    <div class="errors">{{ form.comment.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+            <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+            <a href="{% url 'bookings:my_bookings' %}" class="btn btn-primary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Интерактивные звездочки для рейтинга
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('id_rating');
+    let currentRating = 0;
+
+    // Функция для обновления отображения звезд
+    function updateStars(rating) {
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
+
+    // Обработчик клика по звезде
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            currentRating = rating;
+            ratingInput.value = rating;
+            updateStars(rating);
+        });
+
+        // Обработчик наведения мыши
+        star.addEventListener('mouseover', function() {
+            const rating = parseInt(this.dataset.rating);
+            updateStars(rating);
+        });
+
+        // Обработчик ухода мыши
+        star.addEventListener('mouseout', function() {
+            updateStars(currentRating);
+        });
+    });
+
+    // Восстанавливаем рейтинг при загрузке страницы (если есть)
+    if (ratingInput.value) {
+        currentRating = parseInt(ratingInput.value);
+        updateStars(currentRating);
+    }
+});
+</script>
+{% endblock %}

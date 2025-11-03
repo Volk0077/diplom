@@ -3,7 +3,7 @@ from django import forms
 from django.contrib import messages
 from django.utils.translation import ngettext
 from django.contrib.admin import RelatedFieldListFilter, SimpleListFilter
-from .models import Booking, BookingHistory
+from .models import Booking, BookingHistory, Review
 from users.models import User
 from services.models import ServiceCategory
 
@@ -25,6 +25,26 @@ class StaffFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(staff_id=self.value())
+        return queryset
+
+
+class ReviewStaffFilter(SimpleListFilter):
+    """Фильтр для показа только мастеров в отзывах"""
+
+    title = "Мастер"
+    parameter_name = "booking__staff"
+
+    def lookups(self, request, model_admin):
+        # Возвращаем только мастеров
+        staff_members = User.objects.filter(role="staff").order_by("first_name")
+        return [
+            (staff.id, staff.get_full_name() or staff.username)
+            for staff in staff_members
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(booking__staff_id=self.value())
         return queryset
 
 
@@ -201,3 +221,73 @@ class BookingHistoryAdmin(admin.ModelAdmin):
     list_filter = ("action", "created_at")
     search_fields = ("booking__client__username", "notes")
     readonly_fields = ("created_at",)
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = (
+        "booking_info",
+        "client_name",
+        "staff_name",
+        "rating_display",
+        "comment_preview",
+        "created_at"
+    )
+    list_filter = ("rating", "created_at", ReviewStaffFilter)
+    search_fields = (
+        "booking__client__username",
+        "booking__client__first_name",
+        "booking__client__last_name",
+        "comment"
+    )
+    readonly_fields = ("created_at",)
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        ("Информация о записи", {
+            "fields": ("booking", "client_name", "staff_name")
+        }),
+        ("Отзыв", {
+            "fields": ("rating", "comment")
+        }),
+        ("Системная информация", {
+            "fields": ("created_at",),
+            "classes": ("collapse",)
+        }),
+    )
+
+    def booking_info(self, obj):
+        return f"Запись #{obj.booking.id}"
+    booking_info.short_description = "Запись"
+
+    def client_name(self, obj):
+        full_name = obj.booking.client.get_full_name()
+        return full_name if full_name else obj.booking.client.username
+    client_name.short_description = "Клиент"
+
+    def staff_name(self, obj):
+        return obj.booking.staff.get_full_name()
+    staff_name.short_description = "Мастер"
+
+    def rating_display(self, obj):
+        stars = "⭐" * obj.rating
+        return f"{obj.rating}/5 {stars}"
+    rating_display.short_description = "Рейтинг"
+
+    def comment_preview(self, obj):
+        if obj.comment:
+            return obj.comment[:50] + "..." if len(obj.comment) > 50 else obj.comment
+        return "Без комментария"
+    comment_preview.short_description = "Комментарий"
+
+    def has_add_permission(self, request):
+        # Отзывы могут добавлять только клиенты через интерфейс
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        # Администраторы могут только просматривать отзывы
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        # Разрешаем удаление отзывов администраторам
+        return True

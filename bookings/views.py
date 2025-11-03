@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Booking
-from .forms import BookingForm
+from .forms import BookingForm, ReviewForm  
 from django.contrib import messages
 from users.models import User
 from services.models import Service
@@ -14,7 +14,9 @@ from django.utils import timezone
 @login_required
 def my_bookings(request):
     """Записи клиента"""
-    bookings = Booking.objects.filter(client=request.user).order_by(
+    bookings = Booking.objects.filter(client=request.user).select_related(
+        'service', 'staff', 'review'
+    ).order_by(
         "appointment_date", "appointment_time"
     )
 
@@ -82,6 +84,44 @@ def cancel_booking(request, booking_id):
     
     return redirect('bookings:my_bookings')
 
+
+@login_required
+def add_review(request, booking_id):
+    """Добавление отзыва о записи"""
+    try:
+        booking = Booking.objects.get(
+            id=booking_id,
+            client=request.user,
+            status='completed'
+        )
+
+        #Проверка не оставлен ли уже отзыв 
+        if hasattr(booking,'review'):
+            messages.warning(request, 'Вы уже оставили отзыв на эту запись')
+            return redirect('bookings:my_bookings')
+        
+        if request.method == 'POST':
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review= form.save(commit=False)
+                review.booking = booking
+                review.save()
+
+            messages.success(request, 'Спасибо за отзыв! Ваше мнение важно для нас.')
+            return redirect('bookings:my_bookings')
+        else:
+            form = ReviewForm()
+
+        context = {
+            'form': form,
+            'booking': booking
+        }
+        return render(request, 'bookings/add_review.html', context)
+    
+    except Booking.DoesNotExist:
+        messages.error(request, 'Запись не найдена')
+        return redirect('bookings:my_bookings')
+    
 
 def api_services_list(request):
     """API для получения списка услуг по категории"""

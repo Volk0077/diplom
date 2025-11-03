@@ -61,13 +61,116 @@
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 15px;
-    list-style: none; /* Убираем маркеры списка */
+    list-style: none; 
 }
 
 .errors::before {
-    display: none; /* Убираем любые псевдоэлементы */
+    display: none;
 }
 
 .errors li {
-    list-style: none; /* Убираем маркеры у элементов списка */
+    list-style: none; 
+}
+
+/* Стили для кнопок */
+.btn-primary {
+    background: #667eea;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    background:linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* .btn-secondary {
+    background: linear-gradient(45deg, #6c757d, #5a6268);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(45deg, #5a6268, #495057);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+} */
+
+/* Стили для звездочек рейтинга */
+.rating-stars {
+    display: flex;
+    gap: 5px;
+    font-size: 2rem;
+    margin: 10px 0;
+    justify-content: center;
+}
+
+.star {
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #ffc107;
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.star:hover ~ .star:not(.active) {
+    color: #ddd;
+}
+
+/* Анимация для звезд */
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.star.active {
+    animation: starPulse 0.6s ease;
+}
+
+/* Стили для страницы отзывов */
+.page-add-review .service-info,
+.page-add-review .form-section {
+    text-align: center;
+}
+
+.page-add-review .form-group textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 15px !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    border: 2px solid rgba(255,255,255,0.3) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.95) !important;
+    color: #333 !important;
+    resize: vertical !important;
+    font-family: inherit !important;
+}
+
+.page-add-review .form-group textarea:focus {
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }

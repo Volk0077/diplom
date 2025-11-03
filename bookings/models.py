@@ -120,3 +120,22 @@ class BookingHistory(models.Model):
 
     def __str__(self) -> str:
         return f"{self.booking} - {self.get_action_display()}"
+    
+
+class Review(models.Model):
+    """Отзывы о мастерах"""
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, verbose_name="Бронирование")
+    rating = models.IntegerField(
+        choices=[(i,f"{i} ⭐") for i in range(1,6)],
+        verbose_name="Рейтинг"
+    )
+    comment = models.TextField(blank=True, verbose_name="Комментарий")
+    created_at= models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Отзыв на {self.booking} - {self.rating}⭐"
