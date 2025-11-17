@@ -35,32 +35,21 @@
                 <td style="padding: 1rem">{{ booking.service.price }} руб.</td>
                 <td style="padding: 1rem">{{ booking.get_status_display }}</td>
                 <td style="padding: 1rem">
-                    {% if booking.status == 'cancelled' %} Отменена {% elif
-                    booking.appointment_date < today or booking.appointment_date
-                    == today and booking.appointment_time <= now_time %} Прошла
-                    {% elif booking.status == 'completed' %} {% if
-                    booking.review %}
-                    <span style="color: #2e8b57; font-weight: bold"
-                        >✓ Отзыв оставлен</span
-                    >
+                    {% if booking.status == 'cancelled' %}
+                        Отменена
+                    {% elif booking.appointment_date < today or booking.appointment_date == today and booking.appointment_time <= now_time %}
+                        Прошла
+                    {% elif booking.status == 'completed' %}
+                        {% if booking.review %}
+                            <span style="color: #2e8b57; font-weight: bold">✓ Отзыв оставлен</span>
+                        {% else %}
+                            <a href="{% url 'bookings:add_review' booking.id %}" class="btn" style="padding: 6px 12px; font-size: 12px">Оставить отзыв</a>
+                        {% endif %}
                     {% else %}
-                    <a
-                        href="{% url 'bookings:add_review' booking.id %}"
-                        class="btn"
-                        style="padding: 6px 12px; font-size: 12px"
-                        >Оставить отзыв</a
-                    >
-                    {% endif %} {% else %}
-                    <form
-                        method="post"
-                        action="{% url 'bookings:cancel_booking' booking.id %}"
-                        style="display: inline"
-                    >
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">
-                            Отменить
-                        </button>
-                    </form>
+                        <form method="post" action="{% url 'bookings:cancel_booking' booking.id %}" style="display: inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Отменить</button>
+                        </form>
                     {% endif %}
                 </td>
             </tr>

@@ -9,7 +9,7 @@ class User(AbstractUser):
         STAFF = "staff", "Мастер"
         CLIENT = "client", "Клиент"
 
-    phone = models.CharField(max_length=32, blank=True, verbose_name="Телефон")
+    phone = models.CharField(max_length=32, blank=False, verbose_name="Телефон")
     role = models.CharField(max_length=16, choices=Roles.choices, default=Roles.CLIENT, verbose_name="Роль")
     specialization = models.ForeignKey(
         ServiceCategory,

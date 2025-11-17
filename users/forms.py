@@ -18,8 +18,8 @@ class UserRegistrationForm(UserCreationForm):
             'placeholder': 'example@mail.com'})
         )
     phone =  forms.CharField(
-        required=False,  
-        max_length=32,   
+        required=True,
+        max_length=32,
         label='Телефон',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
