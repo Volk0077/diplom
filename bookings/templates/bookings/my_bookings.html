@@ -1,9 +1,13 @@
 {% extends 'base.html' %} {% load static %} {% block title %}Мои записи - Салон
-красоты{% endblock %} {% block content %}
+красоты{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %} {% block content %}
 <h1>Мои записи</h1>
 
 {% if bookings %}
-<table style="width: 100%; border-collapse: collapse; margin-top: 2rem">
+<div class="mobile-table">
+<div class="table-responsive">
+<table style="width: 100%; border-collapse: collapse; margin-top: 2rem" class="bookings-table">
     <thead>
         <tr
             style="
@@ -57,6 +61,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p>У вас пока нет записей.</p>
 {% endif %}

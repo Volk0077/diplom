@@ -150,4 +150,54 @@
     .service-info h1 {
         font-size: 2rem;
     }
+
+    /* Мобильная сетка услуг */
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .service-card {
+        padding: 1.2rem;
+    }
+
+    .service-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .category-section h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .services-grid {
+        gap: 0.8rem;
+    }
+
+    .service-card {
+        padding: 1rem;
+        border-radius: 6px;
+    }
+
+    .service-card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .service-price {
+        font-size: 1.1rem;
+    }
+
+    .service-info h1 {
+        font-size: 1.8rem;
+    }
+
+    .service-meta p {
+        font-size: 1rem;
+    }
+
+    .booking-section h2 {
+        font-size: 1.5rem;
+    }
 }

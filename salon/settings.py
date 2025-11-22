@@ -137,4 +137,17 @@ AUTH_USER_MODEL = "users.User"
 
 # Авторизация
 LOGIN_REDIRECT_URL = 'services:list'  # Перенаправление на список услуг, после входа
-LOGIN_URL = 'services:list'
+LOGIN_URL = 'users:login'
+LOGOUT_REDIRECT_URL = 'services:list'
+
+# Email настройки для восстановления пароля
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+
+# Настройки для сброса пароля
+PASSWORD_RESET_TIMEOUT = 259200  # 3 дня в секундах

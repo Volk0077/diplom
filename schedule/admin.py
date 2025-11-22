@@ -25,7 +25,18 @@ class WorkingHoursAdmin(admin.ModelAdmin):
     list_display = ("staff", "get_day_name", "start_time", "end_time", "is_active")
     list_filter = ("day_of_week", "is_active", ScheduleStaffFilter)
     search_fields = ("staff__username", "staff__first_name", "staff__last_name")
-    
+
+    def get_queryset(self, request):
+        """Показывать только мастеров в списке"""
+        qs = super().get_queryset(request)
+        return qs.filter(staff__role='staff')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Ограничить выбор мастеров только пользователями с ролью staff"""
+        if db_field.name == "staff":
+            kwargs["queryset"] = User.objects.filter(role='staff')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_day_name(self, obj):
         days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
         return days[obj.day_of_week]
@@ -37,3 +48,14 @@ class SpecialHoursAdmin(admin.ModelAdmin):
     list_filter = ("date", ScheduleStaffFilter)
     search_fields = ("staff__username", "note")
     date_hierarchy = "date"
+
+    def get_queryset(self, request):
+        """Показывать только мастеров в списке"""
+        qs = super().get_queryset(request)
+        return qs.filter(staff__role='staff')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Ограничить выбор мастеров только пользователями с ролью staff"""
+        if db_field.name == "staff":
+            kwargs["queryset"] = User.objects.filter(role='staff')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)

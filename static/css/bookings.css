@@ -174,3 +174,107 @@
     border-color: #667eea !important;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
+
+/* Мобильная адаптация для бронирований */
+@media (max-width: 768px) {
+    /* Мобильная адаптация для таблиц */
+    .mobile-table {
+        background: #fff !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin: 20px 0 !important;
+        padding: 0 !important;
+        position: relative !important;
+    }
+
+    .mobile-table table {
+        width: 100% !important;
+        min-width: 500px !important;
+        font-size: 11px !important;
+        border-collapse: collapse !important;
+    }
+
+    .mobile-table th {
+        background: #667eea !important;
+        color: white !important;
+        padding: 8px 6px !important;
+        font-size: 10px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10 !important;
+        white-space: nowrap !important;
+    }
+
+    .mobile-table td {
+        padding: 6px 8px !important;
+        border-bottom: 1px solid #eee !important;
+        font-size: 11px !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+    }
+
+    .mobile-table .btn {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        white-space: nowrap !important;
+        margin: 2px !important;
+    }
+
+    /* Индикатор прокрутки */
+    .mobile-table::after {
+        content: '← Прокрутить →' !important;
+        position: absolute !important;
+        right: 10px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: rgba(102, 126, 234, 0.8) !important;
+        color: white !important;
+        padding: 4px 8px !important;
+        border-radius: 4px !important;
+        font-size: 10px !important;
+        pointer-events: none !important;
+        z-index: 20 !important;
+    }
+
+    /* Мобильные кнопки в формах */
+    .page-add-review div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .page-add-review div[style*="display: flex"] .btn {
+        width: 100% !important;
+        margin-bottom: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-table {
+        margin: 10px 0 !important;
+        border-radius: 8px !important;
+    }
+
+    .mobile-table table {
+        min-width: 450px !important;
+        font-size: 10px !important;
+    }
+
+    .mobile-table th {
+        padding: 6px 4px !important;
+        font-size: 9px !important;
+    }
+
+    .mobile-table td {
+        padding: 4px 6px !important;
+        font-size: 10px !important;
+    }
+
+    .mobile-table .btn {
+        padding: 3px 6px !important;
+        font-size: 9px !important;
+    }
+}

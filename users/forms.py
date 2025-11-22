@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, SetPasswordForm
 from .models import User
 
 
@@ -47,7 +47,38 @@ class UserRegistrationForm(UserCreationForm):
         '''Сохраняем email в модель'''
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
-        user.role = User.Roles.CLIENT  
+        user.role = User.Roles.CLIENT
         if commit:
             user.save()
         return user
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    """Кастомная форма для сброса пароля"""
+    email = forms.EmailField(
+        required=True,
+        label='Email',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите ваш email',
+            'type': 'email'
+        })
+    )
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+    """Кастомная форма для установки нового пароля"""
+    new_password1 = forms.CharField(
+        label='Новый пароль',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите новый пароль'
+        })
+    )
+    new_password2 = forms.CharField(
+        label='Подтвердите новый пароль',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Повторите новый пароль'
+        })
+    )
